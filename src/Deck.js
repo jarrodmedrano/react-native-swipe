@@ -7,6 +7,11 @@ const SWIPE_OUT_DURATION = 250;
 
 class Deck extends Component {
 
+  static defaultProps = {
+    onSwipeRight: () => {},
+    onSwipeLeft: () => {}
+  };
+
   constructor(props) {
     super(props);
 
@@ -25,9 +30,9 @@ class Deck extends Component {
       //called any time a user lets go
       onPanResponderRelease: (event, gesture) => {
         if(gesture.dx > SWIPE_THRESHHOLD) {
-          this.forceSwipe(SCREEN_WIDTH)
+          this.forceSwipe('right')
         } else if (gesture.dx < -SWIPE_THRESHHOLD) {
-          this.forceSwipe(-SCREEN_WIDTH)
+          this.forceSwipe('left')
         } else {
           this.resetPosition();
         }
@@ -35,7 +40,7 @@ class Deck extends Component {
     });
 
     //both of these exist outside of the state but we declare them here anyway
-    this.state = { panResponder, position };
+    this.state = { panResponder, position, index: 0 };
   }
 
   resetPosition() {
@@ -44,11 +49,18 @@ class Deck extends Component {
     }).start();
   }
 
-  forceSwipe(x) {
+  forceSwipe(direction) {
+    const x = direction === 'right' ? SCREEN_WIDTH : -SCREEN_WIDTH;
     Animated.timing(this.state.position, {
       toValue: { x, y: 0},
       duration: SWIPE_OUT_DURATION
-    }).start();
+    }).start(() => this.onSwipeComplete(direction));
+  }
+
+  onSwipeComplete(direction) {
+    const {onSwipeLeft, onSwipeRight, data} = this.props;
+    const item = data[this.state.index];
+    direction === 'right' ? onSwipeRight(item) : onSwipeLeft(item);
   }
 
   getCardStyle() {
