@@ -1,5 +1,5 @@
 import React, {Component} from 'react'
-import {View, Animated, PanResponder, Dimensions} from 'react-native';
+import {View, Animated, PanResponder, Dimensions, LayoutAnimation, UIManager} from 'react-native';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SWIPE_THRESHHOLD = SCREEN_WIDTH * 0.25;
@@ -47,6 +47,12 @@ class Deck extends Component {
     Animated.spring(this.state.position, {
       toValue: { x: 0, y: 0}
     }).start();
+  }
+
+  componentWillUpdate() {
+    //animate any changes made to the component when it updates
+    UIManager.setLayoutAnimationEnabledExperimental && UIManager.setLayoutAnimationEnabledExperimental(true);
+    LayoutAnimation.spring();
   }
 
   forceSwipe(direction) {
